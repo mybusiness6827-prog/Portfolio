@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import { useRef } from "react";
 
 const CAREER_LOG = [
@@ -51,7 +51,7 @@ interface CardProps {
   i: number;
   range: [number, number];
   targetScale: number;
-  progress: any; // progress is a MotionValue
+  progress: MotionValue<number>; 
 }
 
 function Card({ item, i, range, targetScale, progress }: CardProps) {

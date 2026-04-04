@@ -149,7 +149,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       window.removeEventListener("keydown", handleSnap);
       window.removeEventListener("resize", handleResize);
     };
-  }, [loadedCount, totalFrames]);
+  }, [loadedCount, totalFrames, frameIndex]);
 
   // --- FRAME-PERFECT OVERLAY LOGIC ---
   const heroOpacity = useTransform(frameIndex, [0, 8, 12], [1, 0, 0]);

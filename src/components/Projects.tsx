@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ExternalLink, Database } from "lucide-react";
+import Image from "next/image";
 
 const PROJECTS = [
   {
@@ -101,9 +101,11 @@ export default function Projects() {
             >
               <div className="flex flex-col h-full justify-between gap-12 relative z-10">
                 <div className="relative w-full aspect-video overflow-hidden rounded-[2rem] border border-white/5 grayscale group-hover:grayscale-0 transition-all duration-1000 bg-zinc-900">
-                  <img
+                  <Image
                     src={project.image}
                     alt={project.title}
+                    width={1200}
+                    height={675}
                     className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-all duration-1000 opacity-40 group-hover:opacity-100"
                   />
                 </div>

@@ -46,7 +46,15 @@ const CAREER_LOG = [
   }
 ];
 
-function Card({ item, i, range, targetScale, progress }: any) {
+interface CardProps {
+  item: typeof CAREER_LOG[0];
+  i: number;
+  range: [number, number];
+  targetScale: number;
+  progress: any; // progress is a MotionValue
+}
+
+function Card({ item, i, range, targetScale, progress }: CardProps) {
   const scale = useTransform(progress, range, [1, targetScale]);
 
   return (

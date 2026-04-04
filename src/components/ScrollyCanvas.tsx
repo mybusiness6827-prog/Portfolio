@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useScroll, useTransform, motion, useMotionValueEvent } from "framer-motion";
 import filenames from "./filenames.json";
 
@@ -340,7 +340,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                   Delivered Fast
                 </h3>
                 <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
-                  Tight deadlines don't scare me.<br />
+                  Tight deadlines don&apos;t scare me.<br />
                   Speed without cutting corners.
                 </p>
               </div>

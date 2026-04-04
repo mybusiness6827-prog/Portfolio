@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Quote, CheckCircle2 } from "lucide-react";
+import { Star, CheckCircle2 } from "lucide-react";
 import React, { useState } from "react";
 
 const REVIEWS = [
@@ -130,7 +130,7 @@ const ReviewCard = ({ review }: { review: typeof REVIEWS[0] }) => (
       )}
     </div>
     <p className="text-zinc-400 text-base md:text-lg leading-relaxed italic font-light mb-8">
-      "{review.text}"
+      &quot;{review.text}&quot;
     </p>
     <div className="flex items-center gap-4 border-t border-white/5 pt-6">
       <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-white/[0.02] f-syne font-black italic text-amber-500 text-[10px] group-hover:border-amber-500/40 transition-colors uppercase">

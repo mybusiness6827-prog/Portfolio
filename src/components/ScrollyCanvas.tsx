@@ -141,8 +141,6 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
     const containerTop = containerRef.current?.offsetTop || 0;
     const containerHeight = containerRef.current?.offsetHeight || 0;
     const scrollRange = containerHeight - window.innerHeight;
-    const stop1 = isMobile ? 42 : 43;
-    const stopEnd = totalFrames - 1;
 
     const scrollToFrame = (frame: number) => {
       if (isAnimatingRef.current) return;
@@ -253,7 +251,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("resize", handleResize);
     };
-  }, [loadedCount, totalFrames, frameIndex]);
+  }, [loadedCount, totalFrames, frameIndex, isMobile, maxScrollLimit]);
 
   // --- FRAME-PERFECT OVERLAY LOGIC ---
   const heroOpacity = useTransform(frameIndex, [0, 8, 12], [1, 0, 0]);

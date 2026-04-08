@@ -16,8 +16,11 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const [loadedCount, setLoadedCount] = useState(0);
+  const isAnimatingRef = useRef(false);
+  const lastSnapTimeRef = useRef(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false); // For nearby screens up to 768px
+  const [maxScrollLimit, setMaxScrollLimit] = useState(0);
 
   // Requirements
   const MIN_FRAMES = 45;
@@ -29,7 +32,14 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
     const checkSize = () => {
       const width = window.innerWidth;
       setIsMobile(width < 640);
-      setIsPortrait(width < 768); // Applied to UI layout for nearby screens
+      setIsPortrait(width < 768);
+
+      // Set the hard limit for Section 3
+      if (containerRef.current) {
+        const top = containerRef.current.offsetTop;
+        const range = containerRef.current.offsetHeight - window.innerHeight;
+        setMaxScrollLimit(top + range);
+      }
     };
     checkSize();
     window.addEventListener("resize", checkSize);
@@ -127,63 +137,120 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       }
     };
 
-    // --- SNAP LOGIC (0 -> 43 -> End) ---
-    const handleSnap = (e: KeyboardEvent) => {
-      const containerTop = containerRef.current?.offsetTop || 0;
-      const containerHeight = containerRef.current?.offsetHeight || 0;
-      const currentFrame = Math.round(frameIndex.get());
-      const scrollRange = containerHeight - window.innerHeight;
+    // --- SNAP LOGIC (Wheel & Keyboard) ---
+    const containerTop = containerRef.current?.offsetTop || 0;
+    const containerHeight = containerRef.current?.offsetHeight || 0;
+    const scrollRange = containerHeight - window.innerHeight;
+    const stop1 = isMobile ? 42 : 43;
+    const stopEnd = totalFrames - 1;
 
-      // Dynamic snap points
+    const scrollToFrame = (frame: number) => {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
+
+      const targetProgress = frame / (totalFrames - 1);
+      const targetY = containerTop + (targetProgress * scrollRange);
+
+      if (isMobile) {
+        // 2-second linear transition for Mobile
+        animate(window.scrollY, targetY, {
+          duration: 2,
+          ease: "linear",
+          onUpdate: (latest: number) => window.scrollTo(0, latest),
+          onComplete: () => {
+            isAnimatingRef.current = false;
+            lastSnapTimeRef.current = Date.now();
+          }
+        });
+      } else {
+        // 1s transition for Desktop
+        animate(window.scrollY, targetY, {
+          duration: 1,
+          ease: [0.23, 1, 0.32, 1],
+          onUpdate: (latest: number) => window.scrollTo(0, latest),
+          onComplete: () => {
+            isAnimatingRef.current = false;
+            lastSnapTimeRef.current = Date.now();
+          }
+        });
+      }
+    };
+
+    const handleSnap = (e: KeyboardEvent) => {
+      const now = Date.now();
+      const currentFrame = Math.round(frameIndex.get());
+
+      // Only snap if we are within the animation range
+      if (window.scrollY > maxScrollLimit + 10) return;
+
+      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp"].includes(e.key)) {
+        // Natural exit at the very bottom
+        if (currentFrame >= totalFrames - 1 && (e.key === "ArrowDown" || e.key === "PageDown")) return;
+        
+        e.preventDefault();
+        
+        // Cooldown Lock (0.5s)
+        if (isAnimatingRef.current || now - lastSnapTimeRef.current < 500) return;
+
+        const stop1 = isMobile ? 42 : 43;
+        const stopEnd = totalFrames - 1;
+
+        if (e.key === "ArrowDown" || e.key === "PageDown") {
+          if (currentFrame < 35) scrollToFrame(stop1);
+          else if (currentFrame < (isMobile ? 75 : 70)) scrollToFrame(stopEnd);
+        } else {
+          if (currentFrame > (isMobile ? 70 : 60)) scrollToFrame(stop1);
+          else if (currentFrame > 20) scrollToFrame(0);
+        }
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      const currentFrame = Math.round(frameIndex.get());
+
+      // If we are past Section 3, allow natural scroll
+      if (window.scrollY > maxScrollLimit + 10) return;
+
+      // Natural exit if at the very end and scrolling down
+      if (currentFrame >= totalFrames - 1 && e.deltaY > 0) return;
+      // Natural exit if at the very top and scrolling up
+      if (currentFrame <= 0 && e.deltaY < 0) return;
+
+      // HIJACK SCROLL: Stop browser natural movement
+      e.preventDefault();
+
+      // Cooldown Lock (0.5s)
+      if (isAnimatingRef.current || now - lastSnapTimeRef.current < 500) return;
+
+      if (Math.abs(e.deltaY) < 30) return; // Sensitivity threshold
+
       const stop1 = isMobile ? 42 : 43;
       const stopEnd = totalFrames - 1;
 
-      const scrollToFrame = (frame: number) => {
-        const targetProgress = frame / (totalFrames - 1);
-        const targetY = containerTop + (targetProgress * scrollRange);
-
-        if (isMobile) {
-          // 2-second linear transition ONLY for Mobile
-          animate(window.scrollY, targetY, {
-            duration: 2,
-            ease: "linear",
-            onUpdate: (latest: number) => window.scrollTo(0, latest)
-          });
-        } else {
-          // Fast 0.4s transition for Desktop
-          animate(window.scrollY, targetY, {
-            duration: 1,
-            ease: [0.23, 1, 0.32, 1], // Crisp, fast snap
-            onUpdate: (latest: number) => window.scrollTo(0, latest)
-          });
-        }
-      };
-
-      if (e.key === "ArrowDown" || e.key === "PageDown") {
-        if (currentFrame < 20) { // Near Frame 0
-          e.preventDefault();
+      if (e.deltaY > 0) { // Scrolling Down
+        if (currentFrame < 35) {
           scrollToFrame(stop1);
-        } else if (currentFrame >= 20 && currentFrame < (isMobile ? 70 : 60)) { // Near Frame 42/43
-          e.preventDefault();
+        } else if (currentFrame < (isMobile ? 75 : 70)) {
           scrollToFrame(stopEnd);
         }
-      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
-        if (currentFrame > (isMobile ? 70 : 60)) { // Near End
-          e.preventDefault();
+      } else if (e.deltaY < 0) { // Scrolling Up
+        if (currentFrame > (isMobile ? 70 : 60)) {
           scrollToFrame(stop1);
-        } else if (currentFrame <= (isMobile ? 70 : 60) && currentFrame > 20) { // Near Frame 42/43
-          e.preventDefault();
+        } else if (currentFrame > 20) {
           scrollToFrame(0);
         }
       }
     };
 
     window.addEventListener("keydown", handleSnap);
+    window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("resize", handleResize);
     handleResize();
 
     return () => {
       window.removeEventListener("keydown", handleSnap);
+      window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("resize", handleResize);
     };
   }, [loadedCount, totalFrames, frameIndex]);
@@ -310,11 +377,10 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
             </div>
 
             {/* LEFT RAIL: Project index */}
-            <div className={`absolute flex flex-col mix-blend-difference ${
-              isPortrait 
-                ? "top-16 left-6 gap-5 max-w-[140px]" 
-                : "top-1/2 -translate-y-1/2 left-8 md:left-14 gap-8"
-            }`}>
+            <div className={`absolute flex flex-col mix-blend-difference ${isPortrait
+              ? "top-16 left-6 gap-5 max-w-[140px]"
+              : "top-1/2 -translate-y-1/2 left-8 md:left-14 gap-8"
+              }`}>
 
               {/* Section intro */}
               <div className="flex flex-col gap-1 mb-4">
@@ -375,11 +441,10 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
             </div>
 
             {/* RIGHT RAIL: How I work */}
-            <div className={`absolute flex flex-col items-end text-right mix-blend-difference max-w-[260px] ${
-              isPortrait 
-                ? "bottom-12 right-6 gap-5" 
-                : "top-1/2 -translate-y-1/2 right-8 md:right-14 gap-7"
-            }`}>
+            <div className={`absolute flex flex-col items-end text-right mix-blend-difference max-w-[260px] ${isPortrait
+              ? "bottom-12 right-6 gap-5"
+              : "top-1/2 -translate-y-1/2 right-8 md:right-14 gap-7"
+              }`}>
 
               <span className="text-[8px] font-mono tracking-[0.5em] text-amber-400/60 uppercase">
                 How I work
@@ -478,16 +543,14 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
             </div>
 
             {/* RIGHT SIDE: Client Q&A */}
-            <div className={`absolute flex flex-col items-end text-right mix-blend-difference ${
-              isPortrait 
-                ? "bottom-12 right-6 gap-6 max-w-[240px]" 
-                : "top-1/2 -translate-y-1/2 right-8 md:right-14 gap-10 max-w-[360px]"
-            }`}>
+            <div className={`absolute flex flex-col items-end text-right mix-blend-difference ${isPortrait
+              ? "bottom-12 right-6 gap-6 max-w-[240px]"
+              : "top-1/2 -translate-y-1/2 right-8 md:right-14 gap-10 max-w-[360px]"
+              }`}>
 
               {/* Dialogue Header - Repositioned on mobile through classes */}
-              <div className={`flex flex-col gap-1 items-end mb-4 ${
-                isPortrait ? "fixed top-16 left-6 items-start text-left" : ""
-              }`}>
+              <div className={`flex flex-col gap-1 items-end mb-4 ${isPortrait ? "fixed top-16 left-6 items-start text-left" : ""
+                }`}>
                 <span className="text-[8px] font-mono tracking-[0.5em] text-amber-400/60 uppercase">
                   Common Inquiry
                 </span>

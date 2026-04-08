@@ -12,7 +12,7 @@ export default function ScrollIndicator({ frame }: ScrollIndicatorProps) {
   const { scrollY: framerScrollY } = useScroll();
 
   // VARIABLES: Set to true to show
-  const showIndicator = false;
+  const showIndicator = true;
   const showFrame = true;
 
   useMotionValueEvent(framerScrollY, "change", (latest) => {

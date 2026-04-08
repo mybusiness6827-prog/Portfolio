@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useScroll, useTransform, motion, useMotionValueEvent } from "framer-motion";
+import { useScroll, useTransform, motion, useMotionValueEvent, animate } from "framer-motion";
 import filenames from "./filenames.json";
+import filenamesMobile from "./filenames_mobile.json";
 
 interface ScrollyCanvasProps {
   onProgress: (progress: number) => void;
@@ -15,11 +16,25 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const [loadedCount, setLoadedCount] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false); // For nearby screens up to 768px
 
   // Requirements
   const MIN_FRAMES = 45;
-  const totalFrames = filenames.length;
+  const currentFilenames = isMobile ? filenamesMobile : filenames;
+  const totalFrames = currentFilenames.length;
   const progress = (loadedCount / totalFrames) * 100;
+
+  useEffect(() => {
+    const checkSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsPortrait(width < 768); // Applied to UI layout for nearby screens
+    };
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
+  }, []);
 
   useEffect(() => {
     onProgress(progress);
@@ -40,10 +55,16 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
 
   useEffect(() => {
     let count = 0;
+    const folder = isMobile ? "sequence_mobile" : "sequence";
 
-    filenames.forEach((name, index) => {
+    // Pre-clear images if switching to fresh folder
+    imagesRef.current = [];
+    setLoadedCount(0);
+
+    const activeNames = isMobile ? filenamesMobile : filenames;
+    activeNames.forEach((name, index) => {
       const img = new Image();
-      img.src = `/sequence/${name}`;
+      img.src = `/${folder}/${name}`;
       img.onload = () => {
         count++;
         setLoadedCount(count);
@@ -55,7 +76,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       };
       imagesRef.current[index] = img;
     });
-  }, []);
+  }, [isMobile]);
 
   const renderFrame = (index: number) => {
     const images = imagesRef.current;
@@ -113,28 +134,44 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       const currentFrame = Math.round(frameIndex.get());
       const scrollRange = containerHeight - window.innerHeight;
 
+      // Dynamic snap points
+      const stop1 = isMobile ? 42 : 43;
+      const stopEnd = totalFrames - 1;
+
       const scrollToFrame = (frame: number) => {
         const targetProgress = frame / (totalFrames - 1);
         const targetY = containerTop + (targetProgress * scrollRange);
-        window.scrollTo({
-          top: targetY,
-          behavior: "smooth"
-        });
+
+        if (isMobile) {
+          // 2-second linear transition ONLY for Mobile
+          animate(window.scrollY, targetY, {
+            duration: 2,
+            ease: "linear",
+            onUpdate: (latest: number) => window.scrollTo(0, latest)
+          });
+        } else {
+          // Fast 0.4s transition for Desktop
+          animate(window.scrollY, targetY, {
+            duration: 1,
+            ease: [0.23, 1, 0.32, 1], // Crisp, fast snap
+            onUpdate: (latest: number) => window.scrollTo(0, latest)
+          });
+        }
       };
 
       if (e.key === "ArrowDown" || e.key === "PageDown") {
         if (currentFrame < 20) { // Near Frame 0
           e.preventDefault();
-          scrollToFrame(43);
-        } else if (currentFrame >= 20 && currentFrame < 60) { // Near Frame 43
+          scrollToFrame(stop1);
+        } else if (currentFrame >= 20 && currentFrame < (isMobile ? 70 : 60)) { // Near Frame 42/43
           e.preventDefault();
-          scrollToFrame(totalFrames - 1);
+          scrollToFrame(stopEnd);
         }
       } else if (e.key === "ArrowUp" || e.key === "PageUp") {
-        if (currentFrame > 60) { // Near End
+        if (currentFrame > (isMobile ? 70 : 60)) { // Near End
           e.preventDefault();
-          scrollToFrame(43);
-        } else if (currentFrame <= 60 && currentFrame > 20) { // Near Frame 43
+          scrollToFrame(stop1);
+        } else if (currentFrame <= (isMobile ? 70 : 60) && currentFrame > 20) { // Near Frame 42/43
           e.preventDefault();
           scrollToFrame(0);
         }
@@ -154,11 +191,19 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
   // --- FRAME-PERFECT OVERLAY LOGIC ---
   const heroOpacity = useTransform(frameIndex, [0, 8, 12], [1, 0, 0]);
 
-  // Section 2: Peaks perfectly at Frame 43 (Stable peak between 40-47)
-  const section2Opacity = useTransform(frameIndex, [0, 32, 40, 47, 58, 75], [0, 0, 1, 1, 0, 0]);
+  // Section 2: Peaks around stop1
+  const section2Opacity = useTransform(
+    frameIndex,
+    isMobile ? [0, 32, 38, 44, 55, 80] : [0, 32, 40, 47, 58, 75],
+    [0, 0, 1, 1, 0, 0]
+  );
 
-  // Section 3: Peaks at Frame 74/75 (End)
-  const section3Opacity = useTransform(frameIndex, [0, 65, 74, 75], [0, 0, 1, 1]);
+  // Section 3: Peaks at stopEnd
+  const section3Opacity = useTransform(
+    frameIndex,
+    isMobile ? [0, 65, 79, 80] : [0, 65, 74, 75],
+    [0, 0, 1, 1]
+  );
 
   return (
     <div ref={containerRef} className="relative h-[500vh] w-full bg-[#121212]">
@@ -255,7 +300,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
             className="absolute inset-0 z-50 pointer-events-none select-none"
           >
             {/* TOP-RIGHT: Section label */}
-            <div className="absolute top-10 right-10 md:right-14 text-right mix-blend-difference">
+            <div className={`absolute top-10 right-10 md:right-14 text-right mix-blend-difference ${isPortrait ? 'opacity-30 translate-y-2' : ''}`}>
               <p className="text-[9px] font-mono tracking-[0.5em] text-amber-400/70 uppercase mb-1">
                 Chapter 02
               </p>
@@ -264,8 +309,12 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
               </p>
             </div>
 
-            {/* LEFT RAIL: Project index — hugs the far left, face is clear */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-8 md:left-14 flex flex-col gap-8 mix-blend-difference">
+            {/* LEFT RAIL: Project index */}
+            <div className={`absolute flex flex-col mix-blend-difference ${
+              isPortrait 
+                ? "top-16 left-6 gap-5 max-w-[140px]" 
+                : "top-1/2 -translate-y-1/2 left-8 md:left-14 gap-8"
+            }`}>
 
               {/* Section intro */}
               <div className="flex flex-col gap-1 mb-4">
@@ -274,7 +323,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                 </span>
                 <h2
                   className="f-syne font-black italic tracking-tighter text-white leading-[0.85]"
-                  style={{ fontSize: 'clamp(1.4rem, 3vw, 2.4rem)' }}
+                  style={{ fontSize: isPortrait ? '1.5rem' : 'clamp(1.4rem, 3vw, 2.4rem)' }}
                 >
                   Work that<br />
                   <span style={{ WebkitTextStroke: '1px rgba(255,255,255,0.22)', color: 'transparent' }}>
@@ -314,17 +363,23 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                 </h3>
               </div>
 
-              {/* Bottom tag */}
-              <div className="mt-2 flex items-center gap-3">
-                <span className="block w-1.5 h-1.5 rounded-full bg-amber-400/60" />
-                <span className="text-[8px] font-mono tracking-[0.4em] text-white/20 uppercase">
-                  Next.js · Framer
-                </span>
-              </div>
+              {/* Bottom tag - hidden on portrait styles to clear space */}
+              {!isPortrait && (
+                <div className="mt-2 flex items-center gap-3">
+                  <span className="block w-1.5 h-1.5 rounded-full bg-amber-400/60" />
+                  <span className="text-[8px] font-mono tracking-[0.4em] text-white/20 uppercase">
+                    Next.js · Framer
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* RIGHT RAIL: How I work — vertically centered, right edge */}
-            <div className="absolute top-1/2 -translate-y-1/2 right-8 md:right-14 flex flex-col gap-7 items-end text-right mix-blend-difference max-w-[260px]">
+            {/* RIGHT RAIL: How I work */}
+            <div className={`absolute flex flex-col items-end text-right mix-blend-difference max-w-[260px] ${
+              isPortrait 
+                ? "bottom-12 right-6 gap-5" 
+                : "top-1/2 -translate-y-1/2 right-8 md:right-14 gap-7"
+            }`}>
 
               <span className="text-[8px] font-mono tracking-[0.5em] text-amber-400/60 uppercase">
                 How I work
@@ -339,10 +394,12 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                 <h3 className="text-sm font-semibold text-white tracking-tight">
                   Delivered Fast
                 </h3>
-                <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
-                  Tight deadlines don&apos;t scare me.<br />
-                  Speed without cutting corners.
-                </p>
+                {!isPortrait && (
+                  <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
+                    Tight deadlines don&apos;t scare me.<br />
+                    Speed without cutting corners.
+                  </p>
+                )}
               </div>
 
               <div className="h-[1px] w-10 bg-white/5 self-end" />
@@ -356,10 +413,12 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                 <h3 className="text-sm font-semibold text-white tracking-tight">
                   Pixel Perfect
                 </h3>
-                <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
-                  Every detail at 1:1 with the design.<br />
-                  Zero tolerance for slop.
-                </p>
+                {!isPortrait && (
+                  <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
+                    Every detail at 1:1 with the design.<br />
+                    Zero tolerance for slop.
+                  </p>
+                )}
               </div>
 
               <div className="h-[1px] w-10 bg-white/5 self-end" />
@@ -373,10 +432,12 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                 <h3 className="text-sm font-semibold text-white tracking-tight">
                   Blazing Performance
                 </h3>
-                <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
-                  Optimized to the bone.<br />
-                  Fast load, smooth scroll, zero lag.
-                </p>
+                {!isPortrait && (
+                  <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
+                    Optimized to the bone.<br />
+                    Fast load, smooth scroll, zero lag.
+                  </p>
+                )}
               </div>
 
               <div className="h-[1px] w-10 bg-white/5 self-end" />
@@ -390,10 +451,12 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                 <h3 className="text-sm font-semibold text-white tracking-tight">
                   Clean Code
                 </h3>
-                <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
-                  Scalable, readable, maintainable.<br />
-                  Built to last beyond launch.
-                </p>
+                {!isPortrait && (
+                  <p className="text-[10px] font-mono text-zinc-500 tracking-wide leading-relaxed">
+                    Scalable, readable, maintainable.<br />
+                    Built to last beyond launch.
+                  </p>
+                )}
               </div>
 
             </div>
@@ -414,17 +477,23 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
               </p>
             </div>
 
-            {/* RIGHT SIDE: Client Q&A — face is center-left, right is open void */}
-            <div className="absolute top-1/2 -translate-y-1/2 right-8 md:right-14 flex flex-col gap-10 items-end text-right mix-blend-difference max-w-[360px]">
+            {/* RIGHT SIDE: Client Q&A */}
+            <div className={`absolute flex flex-col items-end text-right mix-blend-difference ${
+              isPortrait 
+                ? "bottom-12 right-6 gap-6 max-w-[240px]" 
+                : "top-1/2 -translate-y-1/2 right-8 md:right-14 gap-10 max-w-[360px]"
+            }`}>
 
-              {/* Dialogue Header */}
-              <div className="flex flex-col gap-1 items-end mb-4">
+              {/* Dialogue Header - Repositioned on mobile through classes */}
+              <div className={`flex flex-col gap-1 items-end mb-4 ${
+                isPortrait ? "fixed top-16 left-6 items-start text-left" : ""
+              }`}>
                 <span className="text-[8px] font-mono tracking-[0.5em] text-amber-400/60 uppercase">
                   Common Inquiry
                 </span>
                 <h2
-                  className="f-syne font-black italic tracking-tighter text-white leading-[0.85] text-right"
-                  style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.6rem)' }}
+                  className={`f-syne font-black italic tracking-tighter text-white leading-[0.85] ${isPortrait ? 'text-left' : 'text-right'}`}
+                  style={{ fontSize: isPortrait ? '1.8rem' : 'clamp(1.6rem, 3.5vw, 2.6rem)' }}
                 >
                   Ask the<br />
                   <span style={{ WebkitTextStroke: '1px rgba(255,255,255,0.22)', color: 'transparent' }}>
@@ -439,7 +508,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                   <span className="text-[11px] font-bold text-white italic f-syne">Why choose your execution over others?</span>
                   <span className="text-[8px] font-mono text-amber-400/50 tracking-widest px-2 py-0.5 border border-white/10 rounded-full">Q1</span>
                 </div>
-                <p className="text-[10px] md:text-[11px] font-mono text-zinc-400 tracking-wide leading-relaxed pl-12">
+                <p className={`font-mono text-zinc-400 tracking-wide leading-relaxed ${isPortrait ? 'text-[9px] pl-4' : 'text-[10px] md:text-[11px] pl-12'}`}>
                   I eliminate the friction between design and reality. While others compromise, I ship refined digital monuments that define industry standards.
                 </p>
               </div>
@@ -450,7 +519,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                   <span className="text-[11px] font-bold text-white italic f-syne">How fast can we scale from concept to launch?</span>
                   <span className="text-[8px] font-mono text-amber-400/50 tracking-widest px-2 py-0.5 border border-white/10 rounded-full">Q2</span>
                 </div>
-                <p className="text-[10px] md:text-[11px] font-mono text-zinc-400 tracking-wide leading-relaxed pl-12">
+                <p className={`font-mono text-zinc-400 tracking-wide leading-relaxed ${isPortrait ? 'text-[9px] pl-4' : 'text-[10px] md:text-[11px] pl-12'}`}>
                   Velocity is core to my protocol. I utilize high performance architectures to build scalable ecosystems in fractions of the traditional timeline.
                 </p>
               </div>
@@ -461,7 +530,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
                   <span className="text-[11px] font-bold text-white italic f-syne">What defines the quality of your build?</span>
                   <span className="text-[8px] font-mono text-amber-400/50 tracking-widest px-2 py-0.5 border border-white/10 rounded-full">Q3</span>
                 </div>
-                <p className="text-[10px] md:text-[11px] font-mono text-zinc-400 tracking-wide leading-relaxed pl-12">
+                <p className={`font-mono text-zinc-400 tracking-wide leading-relaxed ${isPortrait ? 'text-[9px] pl-4' : 'text-[10px] md:text-[11px] pl-12'}`}>
                   Obsessive precision in every line of code. My websites are optimized for extreme load speeds and buttery smooth interactions with zero visual lag.
                 </p>
               </div>

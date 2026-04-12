@@ -137,7 +137,7 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       }
     };
 
-    // --- SNAP LOGIC (Wheel & Keyboard) ---
+    // --- SNAP LOGIC (Wheel, Touch & Keyboard) ---
     const containerTop = containerRef.current?.offsetTop || 0;
     const containerHeight = containerRef.current?.offsetHeight || 0;
     const scrollRange = containerHeight - window.innerHeight;
@@ -149,45 +149,28 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       const targetProgress = frame / (totalFrames - 1);
       const targetY = containerTop + (targetProgress * scrollRange);
 
-      if (isMobile) {
-        // 2-second linear transition for Mobile
-        animate(window.scrollY, targetY, {
-          duration: 2,
-          ease: "linear",
-          onUpdate: (latest: number) => window.scrollTo(0, latest),
-          onComplete: () => {
-            isAnimatingRef.current = false;
-            lastSnapTimeRef.current = Date.now();
-          }
-        });
-      } else {
-        // 1s transition for Desktop
-        animate(window.scrollY, targetY, {
-          duration: 1,
-          ease: [0.23, 1, 0.32, 1],
-          onUpdate: (latest: number) => window.scrollTo(0, latest),
-          onComplete: () => {
-            isAnimatingRef.current = false;
-            lastSnapTimeRef.current = Date.now();
-          }
-        });
-      }
+      // Durations: Mobile (2s), Desktop (0.7s) | Easing: Linear
+      animate(window.scrollY, targetY, {
+        duration: isMobile ? 2 : 0.7,
+        ease: "linear",
+        onUpdate: (latest: number) => window.scrollTo(0, latest),
+        onComplete: () => {
+          isAnimatingRef.current = false;
+          lastSnapTimeRef.current = Date.now();
+        }
+      });
     };
 
     const handleSnap = (e: KeyboardEvent) => {
       const now = Date.now();
       const currentFrame = Math.round(frameIndex.get());
 
-      // Only snap if we are within the animation range
       if (window.scrollY > maxScrollLimit + 10) return;
 
       if (["ArrowDown", "ArrowUp", "PageDown", "PageUp"].includes(e.key)) {
-        // Natural exit at the very bottom
         if (currentFrame >= totalFrames - 1 && (e.key === "ArrowDown" || e.key === "PageDown")) return;
         
         e.preventDefault();
-        
-        // Cooldown Lock (0.5s)
         if (isAnimatingRef.current || now - lastSnapTimeRef.current < 500) return;
 
         const stop1 = isMobile ? 42 : 43;
@@ -207,48 +190,83 @@ export default function ScrollyCanvas({ onProgress, onFinish, onFrameChange }: S
       const now = Date.now();
       const currentFrame = Math.round(frameIndex.get());
 
-      // If we are past Section 3, allow natural scroll
       if (window.scrollY > maxScrollLimit + 10) return;
-
-      // Natural exit if at the very end and scrolling down
       if (currentFrame >= totalFrames - 1 && e.deltaY > 0) return;
-      // Natural exit if at the very top and scrolling up
       if (currentFrame <= 0 && e.deltaY < 0) return;
 
-      // HIJACK SCROLL: Stop browser natural movement
       e.preventDefault();
-
-      // Cooldown Lock (0.5s)
       if (isAnimatingRef.current || now - lastSnapTimeRef.current < 500) return;
-
-      if (Math.abs(e.deltaY) < 30) return; // Sensitivity threshold
+      if (Math.abs(e.deltaY) < 30) return;
 
       const stop1 = isMobile ? 42 : 43;
       const stopEnd = totalFrames - 1;
 
-      if (e.deltaY > 0) { // Scrolling Down
-        if (currentFrame < 35) {
-          scrollToFrame(stop1);
-        } else if (currentFrame < (isMobile ? 75 : 70)) {
-          scrollToFrame(stopEnd);
-        }
-      } else if (e.deltaY < 0) { // Scrolling Up
-        if (currentFrame > (isMobile ? 70 : 60)) {
-          scrollToFrame(stop1);
-        } else if (currentFrame > 20) {
-          scrollToFrame(0);
-        }
+      if (e.deltaY > 0) {
+        if (currentFrame < 35) scrollToFrame(stop1);
+        else if (currentFrame < (isMobile ? 75 : 70)) scrollToFrame(stopEnd);
+      } else if (e.deltaY < 0) {
+        if (currentFrame > (isMobile ? 70 : 60)) scrollToFrame(stop1);
+        else if (currentFrame > 20) scrollToFrame(0);
+      }
+    };
+
+    // --- TOUCH SNAP LOGIC ---
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const currentFrame = Math.round(frameIndex.get());
+      if (window.scrollY > maxScrollLimit + 10) return;
+
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+
+      // Natural exit if at ends
+      if (currentFrame >= totalFrames - 1 && deltaY > 0) return;
+      if (currentFrame <= 0 && deltaY < 0) return;
+
+      if (e.cancelable) e.preventDefault();
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const now = Date.now();
+      const currentFrame = Math.round(frameIndex.get());
+      if (window.scrollY > maxScrollLimit + 10) return;
+
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchStartY - touchEndY; // Positive = Swipe Up / Scroll Down
+
+      if (Math.abs(deltaY) < 40) return; // Magnitude of swipe
+      if (isAnimatingRef.current || now - lastSnapTimeRef.current < 500) return;
+
+      const stop1 = isMobile ? 42 : 43;
+      const stopEnd = totalFrames - 1;
+
+      if (deltaY > 0) { // Scrolling Down
+        if (currentFrame < 35) scrollToFrame(stop1);
+        else if (currentFrame < (isMobile ? 75 : 70)) scrollToFrame(stopEnd);
+      } else if (deltaY < 0) { // Scrolling Up
+        if (currentFrame > (isMobile ? 70 : 60)) scrollToFrame(stop1);
+        else if (currentFrame > 20) scrollToFrame(0);
       }
     };
 
     window.addEventListener("keydown", handleSnap);
     window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
     window.addEventListener("resize", handleResize);
     handleResize();
 
     return () => {
       window.removeEventListener("keydown", handleSnap);
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("resize", handleResize);
     };
   }, [loadedCount, totalFrames, frameIndex, isMobile, maxScrollLimit]);

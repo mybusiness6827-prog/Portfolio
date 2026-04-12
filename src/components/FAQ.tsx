@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { useState } from "react";
 
 const FAQ_DATA = [
@@ -46,15 +46,19 @@ const FAQItem = ({ item, index }: { item: typeof FAQ_DATA[0]; index: number }) =
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-8 flex items-center justify-between group text-left"
       >
-        <span className="text-white f-syne font-bold italic text-xl md:text-2xl tracking-tight group-hover:text-amber-500 transition-colors">
+        <span className="text-white f-syne font-bold italic text-sm md:text-2xl tracking-tight group-hover:text-amber-500 transition-colors">
           {item.question}
         </span>
         <motion.div
-          animate={{ rotate: isOpen ? 90 : 0 }}
+          animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.4, ease: "circOut" }}
           className="flex-shrink-0 ml-8"
         >
-          <Plus className={`w-6 h-6 ${isOpen ? "text-amber-500" : "text-white/20"}`} />
+          {isOpen ? (
+            <Minus className="w-4 h-4 md:w-6 md:h-6 text-amber-500" />
+          ) : (
+            <Plus className="w-4 h-4 md:w-6 md:h-6 text-white/20" />
+          )}
         </motion.div>
       </button>
 
@@ -67,8 +71,8 @@ const FAQItem = ({ item, index }: { item: typeof FAQ_DATA[0]; index: number }) =
             transition={{ duration: 0.4, ease: "circOut" }}
             className="overflow-hidden"
           >
-            <div className="pb-8 pr-12">
-               <p className="text-zinc-500 text-lg leading-relaxed font-light italic">
+            <div className="pb-4 md:pb-8 pr-4 md:pr-12">
+               <p className="text-zinc-500 text-xs md:text-lg leading-relaxed font-light italic">
                  {item.answer}
                </p>
             </div>
@@ -81,7 +85,7 @@ const FAQItem = ({ item, index }: { item: typeof FAQ_DATA[0]; index: number }) =
 
 export default function FAQ() {
   return (
-    <section className="bg-black pt-60 pb-40 px-6 md:px-12 relative overflow-hidden border-t border-white/5">
+    <section className="bg-black pt-32 md:pt-60 pb-20 md:pb-40 px-2 md:px-12 relative overflow-hidden border-t border-white/5">
       {/* Background Liquid Atmosphere */}
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-amber-500/[0.02] rounded-full blur-[140px] pointer-events-none" />
       
@@ -107,7 +111,7 @@ export default function FAQ() {
             transition={{ duration: 1.2, ease: "circOut" }}
             viewport={{ once: true }}
             className="text-white f-syne font-black italic tracking-tighter leading-none"
-            style={{ fontSize: 'clamp(3.5rem, 11vw, 8.5rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 11vw, 8.5rem)' }}
           >
             FAQs.
           </motion.h2>
@@ -116,7 +120,7 @@ export default function FAQ() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 0.4 }}
             transition={{ duration: 1.5, delay: 0.3 }}
-            className="text-white font-mono text-[10px] tracking-[0.3em] uppercase max-w-xl leading-relaxed"
+            className="text-white font-mono text-[8px] md:text-[10px] tracking-[0.3em] uppercase max-w-xl leading-relaxed px-4"
           >
             Clearing technical doubts and providing absolute project transparency.
           </motion.p>

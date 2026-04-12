@@ -111,8 +111,12 @@ const REVIEWS = [
   }
 ];
 
-const ReviewCard = ({ review }: { review: typeof REVIEWS[0] }) => (
-  <div className="w-[350px] md:w-[450px] flex-shrink-0 group relative bg-white/[0.01] border border-white/5 p-8 md:p-10 hover:bg-white/[0.03] transition-all duration-700 flex flex-col justify-between">
+const ReviewCard = ({ review, onHover }: { review: typeof REVIEWS[0]; onHover: (paused: boolean) => void }) => (
+  <div 
+    onMouseEnter={() => onHover(true)}
+    onMouseLeave={() => onHover(false)}
+    className="w-[280px] md:w-[450px] flex-shrink-0 group relative bg-white/[0.01] border border-white/5 p-6 md:p-10 hover:bg-white/[0.03] transition-all duration-700 flex flex-col justify-between"
+  >
     <div className="flex justify-between items-start mb-6">
       <div className="flex gap-1">
         {[...Array(review.rating)].map((_, i) => (
@@ -129,7 +133,7 @@ const ReviewCard = ({ review }: { review: typeof REVIEWS[0] }) => (
         </div>
       )}
     </div>
-    <p className="text-zinc-400 text-base md:text-lg leading-relaxed italic font-light mb-8">
+    <p className="text-zinc-400 text-sm md:text-lg leading-relaxed italic font-light mb-8 line-clamp-4 md:line-clamp-none">
       &quot;{review.text}&quot;
     </p>
     <div className="flex items-center gap-4 border-t border-white/5 pt-6">
@@ -137,8 +141,8 @@ const ReviewCard = ({ review }: { review: typeof REVIEWS[0] }) => (
         {review.initials}
       </div>
       <div className="flex flex-col">
-        <h4 className="text-white f-syne font-bold italic tracking-tight text-base">{review.name}</h4>
-        <span className="text-[9px] font-mono text-zinc-600 tracking-[0.2em] uppercase">{review.role}</span>
+        <h4 className="text-white f-syne font-bold italic tracking-tight text-sm md:text-base">{review.name}</h4>
+        <span className="text-[8px] md:text-[9px] font-mono text-zinc-600 tracking-[0.2em] uppercase">{review.role}</span>
       </div>
     </div>
   </div>
@@ -152,14 +156,12 @@ export default function Reviews() {
 
   return (
     <section 
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      className="bg-[#080808] pt-60 pb-40 relative overflow-hidden border-t border-white/5"
+      className="bg-[#080808] pt-32 md:pt-60 pb-20 md:pb-40 relative overflow-hidden border-t border-white/5"
     >
       {/* Background Liquid Atmosphere */}
       <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-amber-500/[0.02] rounded-full blur-[160px] pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 mb-24">
+      <div className="max-w-7xl mx-auto px-2 md:px-12 relative z-10 mb-24">
         {/* SYMMETRICAL HEADER */}
         <div className="flex flex-col items-center text-center space-y-6">
           <motion.div
@@ -180,7 +182,7 @@ export default function Reviews() {
             transition={{ duration: 1.2, ease: "circOut" }}
             viewport={{ once: true }}
             className="text-white f-syne font-black italic tracking-tighter leading-none"
-            style={{ fontSize: 'clamp(3.5rem, 11vw, 8.5rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 11vw, 8.5rem)' }}
           >
             Trust.
           </motion.h2>
@@ -197,7 +199,7 @@ export default function Reviews() {
                  ))}
               </div>
               <div className="h-3 w-[1px] bg-white/10" />
-              <span className="text-white f-syne font-black italic text-lg uppercase">Rating 4.9 / 5.0</span>
+              <span className="text-white f-syne font-black italic text-sm md:text-lg uppercase">Rating 4.9 / 5.0</span>
            </motion.div>
         </div>
       </div>
@@ -212,7 +214,7 @@ export default function Reviews() {
               className="flex gap-1"
             >
                {[...row1, ...row1].map((review, i) => (
-                 <ReviewCard key={i} review={review} />
+                 <ReviewCard key={i} review={review} onHover={setIsPaused} />
                ))}
             </motion.div>
          </div>
@@ -225,7 +227,7 @@ export default function Reviews() {
               className="flex gap-1"
             >
                {[...row2, ...row2].map((review, i) => (
-                 <ReviewCard key={i} review={review} />
+                 <ReviewCard key={i} review={review} onHover={setIsPaused} />
                ))}
             </motion.div>
          </div>
@@ -243,7 +245,7 @@ export default function Reviews() {
           transition={{ duration: 1.5 }}
           className="flex flex-col items-center justify-center py-16 px-12 border-t border-white/5 opacity-50 select-none pointer-events-none"
         >
-           <h4 className="text-white f-syne font-black italic text-5xl md:text-7xl tracking-tighter text-center">
+           <h4 className="text-white f-syne font-black italic text-3xl md:text-7xl tracking-tighter text-center">
               +198 MORE.
            </h4>
            <span className="text-amber-500 font-mono text-[9px] tracking-[0.8em] uppercase italic mt-4">Verified Professional Reviews</span>

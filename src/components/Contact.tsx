@@ -5,7 +5,7 @@ import { Phone, Mail, Globe, Send, Clock, MapPin, Instagram, Facebook } from "lu
 
 export default function Contact() {
   return (
-    <section className="bg-black pt-60 pb-20 px-6 md:px-12 relative overflow-hidden border-t border-white/5">
+    <section className="bg-black pt-32 md:pt-60 pb-20 px-2 md:px-12 relative overflow-hidden border-t border-white/5">
       {/* Background Liquid Atmosphere */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[180px] pointer-events-none" />
       
@@ -31,7 +31,7 @@ export default function Contact() {
             transition={{ duration: 1.2, ease: "circOut" }}
             viewport={{ once: true }}
             className="text-white f-syne font-black italic tracking-tighter leading-none"
-            style={{ fontSize: 'clamp(4rem, 15vw, 12rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 15vw, 12rem)' }}
           >
             Talk.
           </motion.h2>
@@ -40,7 +40,7 @@ export default function Contact() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 0.4 }}
             transition={{ duration: 1.5, delay: 0.3 }}
-            className="text-white font-mono text-[10px] tracking-[0.3em] uppercase max-w-xl leading-relaxed"
+            className="text-white font-mono text-[8px] md:text-[10px] tracking-[0.3em] uppercase max-w-xl leading-relaxed px-4"
           >
             Available for professional global collaborations and high-impact digital engineering.
           </motion.p>
@@ -57,15 +57,15 @@ export default function Contact() {
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
-                className="group bg-white/[0.01] border border-white/5 p-12 hover:bg-amber-500/[0.02] transition-all duration-700"
+                className="group bg-white/[0.01] border border-white/5 p-6 md:p-12 hover:bg-amber-500/[0.02] transition-all duration-700"
               >
-                 <div className="flex flex-col gap-6">
-                    <Mail className="w-5 h-5 text-amber-500" />
-                    <div>
-                       <span className="text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase font-bold text-xs">Mail.</span>
-                       <h4 className="text-white f-syne font-black italic text-lg lg:text-xl tracking-tight group-hover:text-amber-500 transition-colors break-all">workmailofhamza99@gmail.com</h4>
-                    </div>
-                 </div>
+                  <div className="flex flex-col gap-4 md:gap-6">
+                     <Mail className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
+                     <div>
+                        <span className="text-[8px] md:text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase font-bold text-xs">Mail.</span>
+                        <h4 className="text-white f-syne font-black italic text-sm md:text-xl tracking-tight group-hover:text-amber-500 transition-colors break-all">workmailofhamza99@gmail.com</h4>
+                     </div>
+                  </div>
               </motion.a>
 
               {/* PHONE / WHATSAPP */}
@@ -75,21 +75,21 @@ export default function Contact() {
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="group bg-white/[0.01] border border-white/5 p-12 hover:bg-amber-500/[0.02] transition-all duration-700"
+                className="group bg-white/[0.01] border border-white/5 p-6 md:p-12 hover:bg-amber-500/[0.02] transition-all duration-700"
               >
-                 <div className="flex flex-col gap-6">
-                    <Phone className="w-5 h-5 text-amber-500" />
-                    <div>
-                       <span className="text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase font-bold text-xs">Call / Whatsapp.</span>
-                       <h4 className="text-white f-syne font-black italic text-xl md:text-2xl tracking-tight group-hover:text-amber-500 transition-colors">+92 348 4377237</h4>
-                    </div>
-                 </div>
+                  <div className="flex flex-col gap-4 md:gap-6">
+                     <Phone className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
+                     <div>
+                        <span className="text-[8px] md:text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase font-bold text-xs">Call / Whatsapp.</span>
+                        <h4 className="text-white f-syne font-black italic text-lg md:text-2xl tracking-tight group-hover:text-amber-500 transition-colors">+92 348 4377237</h4>
+                     </div>
+                  </div>
               </motion.a>
 
               {/* SOCIAL REACH: Professional Links */}
-              <div className="bg-white/[0.01] border border-white/5 p-12 flex flex-col gap-8">
-                 <span className="text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase font-bold text-xs">Follow.</span>
-                 <div className="flex flex-wrap gap-8">
+              <div className="bg-white/[0.01] border border-white/5 p-6 md:p-12 flex flex-col gap-8">
+                 <span className="text-[8px] md:text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase font-bold text-xs">Follow.</span>
+                 <div className="flex flex-wrap gap-x-8 gap-y-4">
                     {/* INSTAGRAM */}
                     <a href="https://instagram.com" target="_blank" className="flex items-center gap-3 group/link">
                        <Instagram className="w-4 h-4 text-white/20 group-hover/link:text-amber-500 transition-colors" />
@@ -131,12 +131,12 @@ export default function Contact() {
                  </div>
               </div>
 
-              <div className="mt-20 group/btn relative cursor-pointer z-10">
-                 <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center group-hover/btn:border-amber-500/50 group-hover/btn:bg-amber-500 transition-all duration-500">
-                       <Send className="w-5 h-5 text-zinc-500 group-hover/btn:text-black transition-colors" />
+              <div className="mt-12 md:mt-20 group/btn relative cursor-pointer z-10">
+                 <div className="flex items-center gap-4 md:gap-6">
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border border-white/10 flex items-center justify-center group-hover/btn:border-amber-500/50 group-hover/btn:bg-amber-500 transition-all duration-500">
+                       <Send className="w-4 h-4 md:w-5 md:h-5 text-zinc-500 group-hover/btn:text-black transition-colors" />
                     </div>
-                    <span className="text-white f-syne font-bold italic tracking-widest text-xl group-hover/btn:text-amber-500 transition-colors">Initiate Flow</span>
+                    <span className="text-white f-syne font-bold italic tracking-widest text-lg md:text-xl group-hover/btn:text-amber-500 transition-colors">Initiate Flow</span>
                  </div>
               </div>
 

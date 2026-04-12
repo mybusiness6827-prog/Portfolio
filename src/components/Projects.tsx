@@ -56,7 +56,7 @@ const PROJECTS = [
 
 export default function Projects() {
   return (
-    <section className="bg-black pt-32 pb-40 px-6 md:px-12 relative overflow-hidden">
+    <section className="bg-black pt-32 pb-40 px-2 md:px-12 relative overflow-hidden">
       {/* Background Deep Glows */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/[0.03] rounded-full blur-[140px] pointer-events-none" />
 
@@ -82,7 +82,7 @@ export default function Projects() {
             transition={{ duration: 1.2, ease: "circOut" }}
             viewport={{ once: true }}
             className="text-white f-syne font-black italic tracking-tighter leading-none"
-            style={{ fontSize: 'clamp(3.5rem, 11vw, 8.5rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 11vw, 8.5rem)' }}
           >
             Works.
           </motion.h2>
@@ -97,7 +97,7 @@ export default function Projects() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group relative overflow-hidden bg-white/[0.01] border border-white/5 p-8 md:p-12 hover:bg-white/[0.02] transition-all duration-500"
+              className="group relative overflow-hidden bg-white/[0.01] border border-white/5 p-4 md:p-12 hover:bg-white/[0.02] transition-all duration-500"
             >
               <div className="flex flex-col h-full justify-between gap-12 relative z-10">
                 <div className="relative w-full aspect-video overflow-hidden rounded-[2rem] border border-white/5 grayscale group-hover:grayscale-0 transition-all duration-1000 bg-zinc-900">
@@ -113,12 +113,12 @@ export default function Projects() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-mono text-amber-500/80 tracking-[0.4em] uppercase">{project.category}</span>
-                      <h4 className="text-3xl font-bold text-white tracking-tight f-syne italic">{project.title}</h4>
+                      <span className="text-[8px] md:text-[10px] font-mono text-amber-500/80 tracking-[0.4em] uppercase">{project.category}</span>
+                      <h4 className="text-xl md:text-3xl font-bold text-white tracking-tight f-syne italic">{project.title}</h4>
                     </div>
-                    <span className="text-[10px] font-mono text-white/20 tracking-widest uppercase italic">{project.id}</span>
+                    <span className="text-[8px] md:text-[10px] font-mono text-white/20 tracking-widest uppercase italic">{project.id}</span>
                   </div>
-                  <p className="text-zinc-500 text-sm font-light italic leading-relaxed max-w-sm">
+                  <p className="text-zinc-500 text-[11px] md:text-sm font-light italic leading-relaxed max-w-sm">
                     {project.description}
                   </p>
                 </div>
@@ -126,8 +126,8 @@ export default function Projects() {
                 <div className="flex flex-wrap gap-x-6 gap-y-3 pt-6 border-t border-white/5">
                   {project.tech.map((tag) => (
                     <div key={tag} className="flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-amber-500/40" />
-                      <span className="text-[10px] font-mono text-zinc-400 tracking-widest uppercase">{tag}</span>
+                       <div className="w-1 h-1 rounded-full bg-amber-500/40" />
+                       <span className="text-[8px] md:text-[10px] font-mono text-zinc-400 tracking-widest uppercase">{tag}</span>
                     </div>
                   ))}
                 </div>
@@ -151,14 +151,14 @@ export default function Projects() {
             >
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex gap-20 items-center">
-                  <span className="text-white/10 font-black f-syne italic text-6xl tracking-tighter">P.07 / OMNI WEB</span>
-                  <span className="text-amber-500/10 font-black f-syne italic text-6xl tracking-tighter">P.08 / CYBER CORE</span>
-                  <span className="text-white/10 font-black f-syne italic text-6xl tracking-tighter">P.09 / NEURAL FLOW</span>
-                  <span className="text-amber-500/10 font-black f-syne italic text-6xl tracking-tighter">P.10 / DATA SENTINEL</span>
-                  <span className="text-white/10 font-black f-syne italic text-6xl tracking-tighter">P.11 / QUANTUM UI</span>
-                  <span className="text-amber-500/10 font-black f-syne italic text-6xl tracking-tighter">P.12 / SYSTEM OS</span>
-                  <span className="text-white/10 font-black f-syne italic text-6xl tracking-tighter">P.13 / LOGIC HUB</span>
-                  <span className="text-amber-500/10 font-black f-syne italic text-6xl tracking-tighter">P.14 / GLOBAL FLOW</span>
+                  <span className="text-white/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.07 / OMNI WEB</span>
+                  <span className="text-amber-500/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.08 / CYBER CORE</span>
+                  <span className="text-white/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.09 / NEURAL FLOW</span>
+                  <span className="text-amber-500/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.10 / DATA SENTINEL</span>
+                  <span className="text-white/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.11 / QUANTUM UI</span>
+                  <span className="text-amber-500/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.12 / SYSTEM OS</span>
+                  <span className="text-white/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.13 / LOGIC HUB</span>
+                  <span className="text-amber-500/10 font-black f-syne italic text-3xl md:text-6xl tracking-tighter">P.14 / GLOBAL FLOW</span>
                 </div>
               ))}
             </motion.div>

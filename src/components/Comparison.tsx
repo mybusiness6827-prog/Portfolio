@@ -56,7 +56,7 @@ const COMPARISON_DATA = [
 
 export default function Comparison() {
   return (
-    <section className="bg-black pt-60 pb-40 px-6 md:px-12 relative overflow-hidden border-t border-white/5">
+    <section className="bg-black pt-32 md:pt-60 pb-20 md:pb-40 px-2 md:px-12 relative overflow-hidden border-t border-white/5">
       {/* Background Glow */}
       <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-amber-500/[0.03] rounded-full blur-[150px] pointer-events-none translate-x-[-20%] -translate-y-[20%]" />
 
@@ -82,7 +82,7 @@ export default function Comparison() {
             transition={{ duration: 1.2, ease: "circOut" }}
             viewport={{ once: true }}
             className="text-white f-syne font-black italic tracking-tighter leading-none"
-            style={{ fontSize: 'clamp(3.5rem, 11vw, 8.5rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 11vw, 8.5rem)' }}
           >
             Why Me?
           </motion.h2>
@@ -91,7 +91,7 @@ export default function Comparison() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 0.4 }}
             transition={{ duration: 1.5, delay: 0.3 }}
-            className="text-white font-mono text-[10px] tracking-[0.3em] uppercase max-w-xl leading-relaxed"
+            className="text-white font-mono text-[8px] md:text-[10px] tracking-[0.3em] uppercase max-w-xl leading-relaxed px-4"
           >
             Why choosing me is the best decision for your business projects.
           </motion.p>
@@ -101,15 +101,15 @@ export default function Comparison() {
         <div className="relative group p-[1px] bg-gradient-to-b from-white/10 to-transparent">
           <div className="bg-[#080808] overflow-hidden rounded-sm">
             {/* Header Row */}
-            <div className="grid grid-cols-12 gap-4 p-8 border-b border-white/5 items-center bg-white/[0.02]">
+            <div className="grid grid-cols-12 gap-2 p-4 md:p-8 border-b border-white/5 items-center bg-white/[0.02]">
               <div className="col-span-6 md:col-span-8">
-                <span className="text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase">Features</span>
+                <span className="text-[8px] md:text-[10px] font-mono text-zinc-500 tracking-[0.4em] uppercase">Features</span>
               </div>
               <div className="col-span-3 md:col-span-2 text-center">
-                <span className="text-amber-500 font-mono text-[10px] tracking-[0.4em] uppercase font-black italic">Me</span>
+                <span className="text-amber-500 font-mono text-[8px] md:text-[10px] tracking-[0.4em] uppercase font-black italic">Me</span>
               </div>
               <div className="col-span-3 md:col-span-2 text-center">
-                <span className="text-white/20 font-mono text-[10px] tracking-[0.4em] uppercase">Others</span>
+                <span className="text-white/20 font-mono text-[8px] md:text-[10px] tracking-[0.4em] uppercase">Others</span>
               </div>
             </div>
 
@@ -121,28 +121,28 @@ export default function Comparison() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="grid grid-cols-12 gap-4 p-8 border-b border-white/5 items-center hover:bg-white/[0.01] transition-colors"
+                className="grid grid-cols-12 gap-2 md:gap-4 p-4 md:p-8 border-b border-white/5 items-center hover:bg-white/[0.01] transition-colors"
               >
                 <div className="col-span-6 md:col-span-8 space-y-1">
-                  <h4 className="text-white f-syne font-bold italic tracking-tight text-xl">{row.feature}</h4>
-                  <p className="text-zinc-600 text-[9px] font-mono tracking-widest uppercase italic">{row.detail}</p>
+                  <h4 className="text-white f-syne font-bold italic tracking-tight text-sm md:text-xl">{row.feature}</h4>
+                  <p className="text-zinc-600 text-[7px] md:text-[9px] font-mono tracking-widest uppercase italic">{row.detail}</p>
                 </div>
 
                 <div className="col-span-3 md:col-span-2 flex justify-center">
                   {row.me ? (
-                    <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.1)]">
-                      <CheckCircle2 className="w-5 h-5 text-amber-500" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                      <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
                     </div>
                   ) : (
-                    <XCircle className="w-6 h-6 text-white/5" />
+                    <XCircle className="w-4 h-4 md:w-6 md:h-6 text-white/5" />
                   )}
                 </div>
 
                 <div className="col-span-3 md:col-span-2 flex justify-center opacity-30 group-hover:opacity-100 transition-opacity">
                   {row.others ? (
-                    <CheckCircle2 className="w-5 h-5 text-white/10" />
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-white/10" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-white/10" />
+                    <XCircle className="w-4 h-4 md:w-5 md:h-5 text-white/10" />
                   )}
                 </div>
               </motion.div>
